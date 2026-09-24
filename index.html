@@ -43,24 +43,50 @@ main{flex:1; display:flex; flex-direction:column; align-items:center; padding:26
 .dropzone .sub{color:var(--muted); font-size:12.5px; margin-top:6px}
 #fileInput{display:none}
 .workspace{width:100%; max-width:980px; display:none; flex-direction:column; gap:18px}
-.compare{
-  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+.viewer{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden}
+.zoomBar{
+  display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--panel2);
+  border-bottom:1px solid var(--border); font-size:12.5px; color:var(--muted);
 }
-@media (max-width:640px){.compare{grid-template-columns:1fr}}
-.pane{
-  background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden;
+.zoomBar button{
+  background:var(--bg2); color:var(--text); border:1px solid var(--border); border-radius:6px;
+  width:26px; height:26px; cursor:pointer; font-size:14px; line-height:1;
 }
-.pane .label{
-  display:flex; justify-content:space-between; padding:10px 14px; font-size:12.5px;
-  background:var(--panel2); color:var(--muted); border-bottom:1px solid var(--border);
-}
-.pane .label b{color:var(--text)}
-.pane .imgwrap{
-  display:flex; align-items:center; justify-content:center; min-height:220px;
+.zoomBar button:hover{border-color:var(--accent-glow)}
+.zoomBar #zoomReset{width:auto; padding:0 10px; font-size:12px}
+.canvasWrap{
+  position:relative; height:440px; overflow:hidden; cursor:grab;
   background:repeating-conic-gradient(#0a1220 0% 25%, #0d1526 0% 50%) 50%/16px 16px;
-  overflow:hidden;
+  display:flex; align-items:center; justify-content:center; touch-action:none;
 }
-.pane canvas,.pane img{max-width:100%; max-height:340px; display:block}
+.canvasWrap.panning{cursor:grabbing}
+.stage{position:relative; user-select:none}
+.stage img, .stage canvas{display:block; max-height:440px; max-width:100%; pointer-events:none}
+.clipLayer{position:absolute; top:0; left:0; height:100%; overflow:hidden}
+.clipLayer canvas{height:100%; width:auto; max-height:none; max-width:none}
+.handle{
+  position:absolute; top:0; bottom:0; width:0; cursor:ew-resize; z-index:5;
+}
+.handle .line{position:absolute; top:0; bottom:0; left:-1px; width:2px; background:#fff; box-shadow:0 0 8px rgba(0,0,0,.5)}
+.handle .knob{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:34px; height:34px; border-radius:50%; background:#fff; color:#111;
+  display:flex; align-items:center; justify-content:center; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+.tagRow{display:flex; justify-content:space-between; padding:10px 14px; font-size:12.5px; background:var(--panel2); border-top:1px solid var(--border)}
+.tagRow .tag{color:var(--muted)}
+.tagRow .tag b{color:var(--text); margin-left:4px}
+.targetBox{
+  background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px;
+  display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end;
+}
+.targetBox .ctrl{flex:1; min-width:130px}
+.targetBox input[type=number]{
+  width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--border);
+  border-radius:8px; padding:8px;
+}
+.targetBox .row{display:flex; gap:8px}
+.targetMsg{font-size:12px; color:var(--muted); margin-top:6px; width:100%}
 .controls{
   background:var(--panel); border:1px solid var(--border); border-radius:14px;
   padding:18px; display:flex; flex-wrap:wrap; gap:18px; align-items:center;
@@ -112,14 +138,24 @@ footer{text-align:center; color:var(--muted); font-size:11.5px; padding:16px; op
   <input type="file" id="fileInput" accept="image/*">
 
   <div class="workspace" id="workspace">
-    <div class="compare">
-      <div class="pane">
-        <div class="label"><span data-i18n="original">Original</span><b id="origSize">-</b></div>
-        <div class="imgwrap"><img id="origImg"></div>
+    <div class="viewer">
+      <div class="zoomBar">
+        <button id="zoomOut">−</button>
+        <span id="zoomLevel">100%</span>
+        <button id="zoomIn">+</button>
+        <button id="zoomReset" data-i18n="reset">Reset</button>
+        <span style="margin-left:auto;opacity:.7" data-i18n="dragHint">Drag the handle to compare · scroll to zoom</span>
       </div>
-      <div class="pane">
-        <div class="label"><span data-i18n="compressed">Compressed</span><b id="compSize">-</b></div>
-        <div class="imgwrap"><canvas id="compCanvas"></canvas></div>
+      <div class="canvasWrap" id="canvasWrap">
+        <div class="stage" id="stage">
+          <img id="origImg" draggable="false">
+          <div class="clipLayer" id="clipLayer"><canvas id="compCanvas"></canvas></div>
+          <div class="handle" id="handle"><div class="line"></div><div class="knob">⇔</div></div>
+        </div>
+      </div>
+      <div class="tagRow">
+        <span class="tag"><span data-i18n="original">Original</span><b id="origSize">-</b></span>
+        <span class="tag"><span data-i18n="compressed">Compressed</span><b id="compSize">-</b></span>
       </div>
     </div>
 
@@ -139,6 +175,21 @@ footer{text-align:center; color:var(--muted); font-size:11.5px; padding:16px; op
       <div class="savings" id="savingsBox">—</div>
     </div>
 
+    <div class="targetBox">
+      <div class="ctrl">
+        <label data-i18n="targetSize" style="font-size:12.5px;color:var(--muted)">Target size</label>
+        <div class="row">
+          <input type="number" id="targetValue" min="1" value="2" style="flex:1">
+          <select id="targetUnit" style="width:90px">
+            <option value="1048576" selected>MB</option>
+            <option value="1024">KB</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="targetBtn" data-i18n="compressTo">Compress to target</button>
+      <div class="targetMsg" id="targetMsg"></div>
+    </div>
+
     <div class="actions">
       <button class="btn secondary" id="resetBtn" data-i18n="another">Another image</button>
       <button class="btn" id="downloadBtn" data-i18n="download">Download</button>
@@ -152,15 +203,27 @@ const i18n = {
   id:{title:"Squish",subtitle:"Kompres gambar langsung di browser tanpa upload ke server.",
     dropTitle:"Seret gambar ke sini atau klik untuk pilih",dropSub:"Mendukung JPG, PNG, WebP",
     original:"Asli",compressed:"Hasil",format:"Format",quality:"Kualitas",
-    download:"Unduh",another:"Gambar lain",saved:"lebih kecil"},
+    download:"Unduh",another:"Gambar lain",saved:"lebih kecil",reset:"Reset",
+    dragHint:"Geser gagang untuk bandingkan · scroll untuk zoom",
+    targetSize:"Ukuran target",compressTo:"Kompres ke target",
+    targetDone:"Tercapai pada kualitas", targetClose:"Terdekat pada kualitas",
+    targetPngErr:"Ukuran target tidak berlaku untuk PNG (tidak ada kontrol kualitas)."},
   en:{title:"Squish",subtitle:"Compress images right in your browser — nothing uploaded.",
     dropTitle:"Drag an image here or click to select",dropSub:"Supports JPG, PNG, WebP",
     original:"Original",compressed:"Compressed",format:"Format",quality:"Quality",
-    download:"Download",another:"Another image",saved:"smaller"},
+    download:"Download",another:"Another image",saved:"smaller",reset:"Reset",
+    dragHint:"Drag the handle to compare · scroll to zoom",
+    targetSize:"Target size",compressTo:"Compress to target",
+    targetDone:"Reached at quality", targetClose:"Closest at quality",
+    targetPngErr:"Target size doesn't apply to PNG (no quality control)."},
   ja:{title:"Squish",subtitle:"ブラウザ上で画像を圧縮。サーバーへのアップロードなし。",
     dropTitle:"画像をここにドラッグ、またはクリックして選択",dropSub:"JPG、PNG、WebP に対応",
     original:"元の画像",compressed:"圧縮後",format:"形式",quality:"品質",
-    download:"ダウンロード",another:"別の画像",saved:"削減"}
+    download:"ダウンロード",another:"別の画像",saved:"削減",reset:"リセット",
+    dragHint:"ハンドルをドラッグして比較 · スクロールでズーム",
+    targetSize:"目標サイズ",compressTo:"目標に圧縮",
+    targetDone:"到達した品質", targetClose:"最も近い品質",
+    targetPngErr:"PNGには目標サイズは適用できません（品質設定なし）。"}
 };
 let lang = "en";
 function applyI18n(){
@@ -179,7 +242,13 @@ const formatSelect=document.getElementById("formatSelect"), qualitySlider=docume
 const qualityVal=document.getElementById("qualityVal"), qualityCtrl=document.getElementById("qualityCtrl");
 const origSizeEl=document.getElementById("origSize"), compSizeEl=document.getElementById("compSize");
 const savingsBox=document.getElementById("savingsBox");
+const canvasWrap=document.getElementById("canvasWrap"), stage=document.getElementById("stage");
+const clipLayer=document.getElementById("clipLayer"), handle=document.getElementById("handle");
+const zoomLevelEl=document.getElementById("zoomLevel");
+const targetValue=document.getElementById("targetValue"), targetUnit=document.getElementById("targetUnit");
+const targetBtn=document.getElementById("targetBtn"), targetMsg=document.getElementById("targetMsg");
 let origBytes=0, compBytes=0, imgEl=null, lastBlobUrl=null;
+let zoom=1, panX=0, panY=0, comparePct=50;
 
 dropzone.addEventListener("click",()=>fileInput.click());
 ["dragenter","dragover"].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.add("drag");}));
@@ -199,6 +268,8 @@ function handleFile(file){
       origSizeEl.textContent=fmtSize(origBytes);
       compCanvas.width=imgEl.naturalWidth; compCanvas.height=imgEl.naturalHeight;
       dropzone.style.display="none"; workspace.style.display="flex";
+      zoom=1; panX=0; panY=0; comparePct=50; targetMsg.textContent="";
+      applyTransform(); updateClip();
       renderCompressed();
     };
     imgEl.src=e.target.result;
@@ -206,21 +277,26 @@ function handleFile(file){
   reader.readAsDataURL(file);
 }
 
-function renderCompressed(){
+function encode(format,quality){
+  return new Promise(res=>{
+    compCanvas.toBlob(blob=>res(blob), format, format==="image/png" ? undefined : quality);
+  });
+}
+
+async function renderCompressed(){
   if(!imgEl) return;
   ctx.clearRect(0,0,compCanvas.width,compCanvas.height);
   ctx.drawImage(imgEl,0,0);
   const format=formatSelect.value;
   const quality=Number(qualitySlider.value)/100;
   qualityCtrl.style.opacity = format==="image/png" ? .4 : 1;
-  compCanvas.toBlob(blob=>{
-    if(!blob) return;
-    compBytes=blob.size;
-    compSizeEl.textContent=fmtSize(compBytes);
-    if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
-    lastBlobUrl=URL.createObjectURL(blob);
-    computeSavings();
-  }, format, format==="image/png" ? undefined : quality);
+  const blob=await encode(format,quality);
+  if(!blob) return;
+  compBytes=blob.size;
+  compSizeEl.textContent=fmtSize(compBytes);
+  if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+  lastBlobUrl=URL.createObjectURL(blob);
+  computeSavings();
 }
 
 function computeSavings(){
@@ -230,6 +306,74 @@ function computeSavings(){
   const arrow = diff>=0 ? "↓" : "↑";
   savingsBox.innerHTML = `${arrow} <b>${Math.abs(pct)}%</b> ${i18n[lang].saved}`;
 }
+
+// ---- compare slider ----
+function updateClip(){
+  clipLayer.style.width = comparePct + "%";
+  handle.style.left = comparePct + "%";
+}
+function pctFromClientX(clientX){
+  const r = stage.getBoundingClientRect();
+  return Math.min(100, Math.max(0, ((clientX - r.left) / r.width) * 100));
+}
+let draggingHandle=false;
+handle.addEventListener("pointerdown",e=>{draggingHandle=true; e.stopPropagation(); handle.setPointerCapture(e.pointerId);});
+handle.addEventListener("pointermove",e=>{ if(draggingHandle){ comparePct=pctFromClientX(e.clientX); updateClip(); }});
+handle.addEventListener("pointerup",()=>draggingHandle=false);
+stage.addEventListener("click",e=>{ if(!panning){ comparePct=pctFromClientX(e.clientX); updateClip(); }});
+
+// ---- zoom & pan ----
+function applyTransform(){
+  stage.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
+  zoomLevelEl.textContent = Math.round(zoom*100)+"%";
+}
+document.getElementById("zoomIn").addEventListener("click",()=>{zoom=Math.min(5,zoom+0.25); applyTransform();});
+document.getElementById("zoomOut").addEventListener("click",()=>{zoom=Math.max(1,zoom-0.25); applyTransform();});
+document.getElementById("zoomReset").addEventListener("click",()=>{zoom=1;panX=0;panY=0;applyTransform();});
+canvasWrap.addEventListener("wheel",e=>{
+  e.preventDefault();
+  zoom=Math.min(5,Math.max(1,zoom + (e.deltaY<0?0.15:-0.15)));
+  applyTransform();
+},{passive:false});
+let panning=false, panStart=null;
+canvasWrap.addEventListener("pointerdown",e=>{
+  if(e.target===handle||e.target.closest("#handle")) return;
+  panning=true; panStart={x:e.clientX-panX,y:e.clientY-panY};
+  canvasWrap.classList.add("panning"); canvasWrap.setPointerCapture(e.pointerId);
+});
+canvasWrap.addEventListener("pointermove",e=>{
+  if(panning){ panX=e.clientX-panStart.x; panY=e.clientY-panStart.y; applyTransform(); }
+});
+["pointerup","pointerleave"].forEach(ev=>canvasWrap.addEventListener(ev,()=>{panning=false; canvasWrap.classList.remove("panning");}));
+
+// ---- target size (binary search on quality) ----
+async function compressToTarget(){
+  const format=formatSelect.value;
+  if(format==="image/png"){ targetMsg.textContent=i18n[lang].targetPngErr; return; }
+  const targetBytes = Number(targetValue.value) * Number(targetUnit.value);
+  if(!targetBytes || !imgEl) return;
+  targetBtn.disabled=true;
+  ctx.clearRect(0,0,compCanvas.width,compCanvas.height);
+  ctx.drawImage(imgEl,0,0);
+  let lo=0.01, hi=1, bestQ=1, bestBlob=null, bestDiff=Infinity;
+  for(let i=0;i<8;i++){
+    const mid=(lo+hi)/2;
+    const blob=await encode(format,mid);
+    const diff=Math.abs(blob.size-targetBytes);
+    if(diff<bestDiff){ bestDiff=diff; bestQ=mid; bestBlob=blob; }
+    if(blob.size>targetBytes) hi=mid; else lo=mid;
+  }
+  compBytes=bestBlob.size;
+  compSizeEl.textContent=fmtSize(compBytes);
+  if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+  lastBlobUrl=URL.createObjectURL(bestBlob);
+  qualitySlider.value=Math.round(bestQ*100); qualityVal.textContent=qualitySlider.value;
+  computeSavings();
+  const label = bestBlob.size<=targetBytes*1.02 ? i18n[lang].targetDone : i18n[lang].targetClose;
+  targetMsg.textContent = `${label} ${Math.round(bestQ*100)}% — ${fmtSize(bestBlob.size)}`;
+  targetBtn.disabled=false;
+}
+targetBtn.addEventListener("click",compressToTarget);
 
 formatSelect.addEventListener("change",renderCompressed);
 qualitySlider.addEventListener("input",()=>{qualityVal.textContent=qualitySlider.value; renderCompressed();});
