@@ -13,3 +13,8 @@ Image compressor terinspirasi dari [Squoosh](https://github.com/GoogleChromeLabs
 Cukup buka `index.html` di browser, atau deploy sebagai static site (GitHub Pages, Netlify, Vercel, dll).
 
 Tidak ada dependency atau build step — murni HTML/CSS/JS satu file.
+
+## Install sebagai app (PWA) di Windows
+1. Buka situs di Edge/Chrome.
+2. Klik ikon "Install" di address bar (atau menu ⋮ → "Apps" → "Install this site as an app").
+3. Setelah terinstal, buka app-nya lalu klik kanan ikonnya di taskbar → **Pin to taskbar**.
