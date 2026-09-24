@@ -42,7 +42,7 @@ main{flex:1; display:flex; flex-direction:column; align-items:center; padding:26
 .dropzone svg{width:38px;height:38px;stroke:var(--accent-glow); margin-bottom:10px}
 .dropzone .sub{color:var(--muted); font-size:12.5px; margin-top:6px}
 #fileInput{display:none}
-.workspace{width:100%; max-width:980px; display:none; flex-direction:column; gap:18px}
+.workspace{width:100%; max-width:1400px; display:none; flex-direction:column; gap:18px}
 .viewer{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden}
 .zoomBar{
   display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--panel2);
@@ -53,15 +53,17 @@ main{flex:1; display:flex; flex-direction:column; align-items:center; padding:26
   width:26px; height:26px; cursor:pointer; font-size:14px; line-height:1;
 }
 .zoomBar button:hover{border-color:var(--accent-glow)}
-.zoomBar #zoomReset{width:auto; padding:0 10px; font-size:12px}
+.zoomBar #zoomReset,.zoomBar #fullscreenBtn{width:auto; padding:0 10px; font-size:12px}
 .canvasWrap{
-  position:relative; height:440px; overflow:hidden; cursor:grab;
+  position:relative; height:80vh; overflow:hidden; cursor:grab;
   background:repeating-conic-gradient(#0a1220 0% 25%, #0d1526 0% 50%) 50%/16px 16px;
   display:flex; align-items:center; justify-content:center; touch-action:none;
 }
+.canvasWrap:fullscreen{height:100vh; background:#000}
 .canvasWrap.panning{cursor:grabbing}
 .stage{position:relative; user-select:none}
-.stage img, .stage canvas{display:block; max-height:440px; max-width:100%; pointer-events:none}
+.stage img, .stage canvas{display:block; max-height:80vh; max-width:100%; pointer-events:none}
+.canvasWrap:fullscreen .stage img, .canvasWrap:fullscreen .stage canvas{max-height:100vh}
 .clipLayer{position:absolute; top:0; left:0; height:100%; overflow:hidden}
 .clipLayer canvas{height:100%; width:auto; max-height:none; max-width:none}
 .handle{
@@ -144,6 +146,7 @@ footer{text-align:center; color:var(--muted); font-size:11.5px; padding:16px; op
         <span id="zoomLevel">100%</span>
         <button id="zoomIn">+</button>
         <button id="zoomReset" data-i18n="reset">Reset</button>
+        <button id="fullscreenBtn" data-i18n="fullscreen">⛶ Fullscreen</button>
         <span style="margin-left:auto;opacity:.7" data-i18n="dragHint">Drag the handle to compare · scroll to zoom</span>
       </div>
       <div class="canvasWrap" id="canvasWrap">
@@ -207,7 +210,7 @@ const i18n = {
     dragHint:"Geser gagang untuk bandingkan · scroll untuk zoom",
     targetSize:"Ukuran target",compressTo:"Kompres ke target",
     targetDone:"Tercapai pada kualitas", targetClose:"Terdekat pada kualitas",
-    targetPngErr:"Ukuran target tidak berlaku untuk PNG (tidak ada kontrol kualitas)."},
+    targetPngErr:"Ukuran target tidak berlaku untuk PNG (tidak ada kontrol kualitas).",fullscreen:"⛶ Layar penuh"},
   en:{title:"Squish",subtitle:"Compress images right in your browser — nothing uploaded.",
     dropTitle:"Drag an image here or click to select",dropSub:"Supports JPG, PNG, WebP",
     original:"Original",compressed:"Compressed",format:"Format",quality:"Quality",
@@ -215,7 +218,7 @@ const i18n = {
     dragHint:"Drag the handle to compare · scroll to zoom",
     targetSize:"Target size",compressTo:"Compress to target",
     targetDone:"Reached at quality", targetClose:"Closest at quality",
-    targetPngErr:"Target size doesn't apply to PNG (no quality control)."},
+    targetPngErr:"Target size doesn't apply to PNG (no quality control).",fullscreen:"⛶ Fullscreen"},
   ja:{title:"Squish",subtitle:"ブラウザ上で画像を圧縮。サーバーへのアップロードなし。",
     dropTitle:"画像をここにドラッグ、またはクリックして選択",dropSub:"JPG、PNG、WebP に対応",
     original:"元の画像",compressed:"圧縮後",format:"形式",quality:"品質",
@@ -223,7 +226,7 @@ const i18n = {
     dragHint:"ハンドルをドラッグして比較 · スクロールでズーム",
     targetSize:"目標サイズ",compressTo:"目標に圧縮",
     targetDone:"到達した品質", targetClose:"最も近い品質",
-    targetPngErr:"PNGには目標サイズは適用できません（品質設定なし）。"}
+    targetPngErr:"PNGには目標サイズは適用できません（品質設定なし）。",fullscreen:"⛶ フルスクリーン"}
 };
 let lang = "en";
 function applyI18n(){
@@ -330,6 +333,10 @@ function applyTransform(){
 document.getElementById("zoomIn").addEventListener("click",()=>{zoom=Math.min(5,zoom+0.25); applyTransform();});
 document.getElementById("zoomOut").addEventListener("click",()=>{zoom=Math.max(1,zoom-0.25); applyTransform();});
 document.getElementById("zoomReset").addEventListener("click",()=>{zoom=1;panX=0;panY=0;applyTransform();});
+document.getElementById("fullscreenBtn").addEventListener("click",()=>{
+  if(!document.fullscreenElement) canvasWrap.requestFullscreen();
+  else document.exitFullscreen();
+});
 canvasWrap.addEventListener("wheel",e=>{
   e.preventDefault();
   zoom=Math.min(5,Math.max(1,zoom + (e.deltaY<0?0.15:-0.15)));
