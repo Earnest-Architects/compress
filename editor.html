@@ -29,7 +29,7 @@ header a.back:hover{color:var(--text)}
 .frameWrap{flex:1; position:relative}
 iframe{width:100%; height:100%; border:0; display:block; background:#000}
 .adCover{
-  position:absolute; top:0; right:0; bottom:0; width:260px;
+  position:absolute; top:0; right:0; bottom:0; width:300px;
   background:#171717; pointer-events:none; z-index:2;
   border-left:1px solid #222;
 }
@@ -39,15 +39,11 @@ iframe{width:100%; height:100%; border:0; display:block; background:#000}
   background:var(--panel2); border:1px solid var(--border); border-radius:8px;
   padding:6px 10px; font-size:12px; color:var(--muted);
 }
+.adPanel input[type=range]{width:120px}
 .adPanel button{
   background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:6px;
-  width:22px; height:22px; cursor:pointer;
+  padding:0 10px; height:24px; cursor:pointer;
 }
-.adPanel input{
-  width:52px; background:var(--bg); color:var(--text); border:1px solid var(--border);
-  border-radius:6px; padding:3px 6px; text-align:center;
-}
-.adPanel #hideBtn{width:auto; padding:0 10px}
 </style>
 </head>
 <body>
@@ -56,11 +52,8 @@ iframe{width:100%; height:100%; border:0; display:block; background:#000}
   <a class="back" href="index.html">← Back to Squish</a>
 </header>
 <div class="frameWrap">
-  <div class="adPanel" id="adPanel" style="right:270px">
-    <span>Width</span>
-    <button id="wMinus">−</button>
-    <input type="number" id="wInput" value="260">
-    <button id="wPlus">+</button>
+  <div class="adPanel" id="adPanel" style="right:310px">
+    <input type="range" id="wSlider" min="0" max="500" value="300">
     <button id="hideBtn">Hide</button>
   </div>
   <div class="adCover" id="adCover"></div>
@@ -68,16 +61,12 @@ iframe{width:100%; height:100%; border:0; display:block; background:#000}
 </div>
 <script>
   const cover=document.getElementById('adCover'), panel=document.getElementById('adPanel');
-  const wInput=document.getElementById('wInput'), hideBtn=document.getElementById('hideBtn');
+  const wSlider=document.getElementById('wSlider'), hideBtn=document.getElementById('hideBtn');
   function setWidth(w){
-    w=Math.max(0,w);
     cover.style.width=w+'px';
-    panel.style.right=(w+10)+'px';
-    wInput.value=w;
+    panel.style.right=(Number(w)+10)+'px';
   }
-  document.getElementById('wPlus').addEventListener('click',()=>setWidth(parseInt(wInput.value||0)+20));
-  document.getElementById('wMinus').addEventListener('click',()=>setWidth(parseInt(wInput.value||0)-20));
-  wInput.addEventListener('input',()=>setWidth(parseInt(wInput.value||0)));
+  wSlider.addEventListener('input',()=>setWidth(wSlider.value));
   hideBtn.addEventListener('click',()=>{
     const hidden=cover.classList.toggle('hidden');
     hideBtn.textContent = hidden ? 'Show' : 'Hide';
