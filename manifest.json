@@ -1,7 +1,7 @@
 {
-  "name": "Squish — Earnest Architects",
+  "name": "Kikaku Platform",
   "short_name": "Squish",
-  "description": "画像圧縮・フォトエディター・Excelビューア・動画エディターをひとつにまとめたツール — Earnest Architects",
+  "description": "画像圧縮・フォトエディター・Excelビューア・動画エディターをひとつにまとめたツール — Kikaku platform",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
