@@ -1,4 +1,4 @@
-const CACHE = "squish-v1";
+const CACHE = "squish-v2";
 self.addEventListener("install", e => {
   self.skipWaiting();
 });

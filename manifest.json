@@ -1,7 +1,7 @@
 {
   "name": "Squish — Earnest Architects",
   "short_name": "Squish",
-  "description": "ブラウザ上で画像を圧縮 — Earnest Architects",
+  "description": "画像圧縮・フォトエディター・Excelビューア・動画エディターをひとつにまとめたツール — Earnest Architects",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
