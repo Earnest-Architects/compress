@@ -85,6 +85,7 @@ ada di README versi sebelumnya / repo `opencut-classic`.
 
 ## Tab Office (ONLYOFFICE)
 
-- Word/Excel/PowerPoint/PDF/フォーム memakai editor ONLYOFFICE yang berjalan di browser (konversi via WASM `x2t`, tanpa Document Server). Kode: `office/`, SDK: [oonxt/wasm-onlyoffice-sdk](https://github.com/oonxt/wasm-onlyoffice-sdk) (AGPL-3.0).
-- `x2t` (converter WASM, sudah didekompres) ada di `office/x2t/` jadi tidak perlu header khusus. Aset editor besar (sdkjs/font, ±670 MB) tetap dimuat dari CDN publik lewat `<base href>` di `office/v9.3.0.24-1/`, jadi butuh internet. Untuk mandiri penuh, salin aset dari branch `gh-pages` `oonxt/wasm-onlyoffice-demo` ke server sendiri dan ganti `<base href>`.
-- Harus dibuka lewat http(s) (bukan `file://`).
+- Sub-tab: Word, Excel, Excelビューア (`excel/`, lokal), PowerPoint, PDF, フォーム.
+- Word/Excel/PowerPoint/PDF/フォーム meng-embed (iframe) editor ONLYOFFICE versi browser (WASM) dari demo publik
+  [oonxt/wasm-onlyoffice-demo](https://oonxt.github.io/wasm-onlyoffice-demo/) — tidak ada file besar di repo. Kelimanya berbagi satu iframe (status tetap terjaga); tipe dokumen dipilih lewat tombol New/Open di editor.
+- Ganti sumbernya lewat `OFFICE_URL` di `config.js` bila ingin host sendiri. Butuh internet. Lisensi ONLYOFFICE: AGPL-3.0.

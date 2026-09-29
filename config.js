@@ -8,7 +8,7 @@ window.APP_CONFIG = {
   //   http://localhost:3000    … 自分で動かした OpenCut（README を参照）
   VIDEO_EDITOR_URL: "https://opencut.app",
 
-  // 「Office」タブ（ONLYOFFICE / WASM）の x2t 変換エンジンの URL（x2t.js と x2t.wasm を置いたフォルダ）。
-  //   空なら公開 CDN を使用。自分のサーバーに置く場合は例: "/office/x2t"
-  OFFICE_X2T_URL: ""
+  // 「Office」タブの Word / Excel / PowerPoint / PDF / フォーム に埋め込む ONLYOFFICE エディター（ブラウザ内 WASM 版）の URL。
+  //   空なら公開デモ版を使用。自前でホストした場合はその URL を指定。
+  OFFICE_URL: ""
 };

@@ -151,26 +151,12 @@ body{
       <button role="tab" id="sub-form" aria-selected="false" data-sub="form">フォーム</button>
     </div>
     <div id="subviews">
-    <section class="panel" id="sub-panel-word" data-title="Word" data-src="office/index.html?type=docx" hidden>
-      
-      <div class="frame"><div class="loader">読み込み中…</div></div>
-    </section>
-    <section class="panel" id="sub-panel-excel" data-title="Excel" data-src="office/index.html?type=xlsx" hidden>
-      
+    <section class="panel" id="sub-panel-oo" data-title="ONLYOFFICE" hidden>
+      <div class="bar"><span><b>ONLYOFFICE</b> · <span id="ooHint"></span></span><span class="sp"></span><a id="ooOpen" href="#" target="_blank" rel="noopener noreferrer">新しいタブで開く ↗</a></div>
       <div class="frame"><div class="loader">読み込み中…</div></div>
     </section>
     <section class="panel" id="sub-panel-viewer" data-title="Excelビューア" data-src="excel/index.html" hidden>
       
-      <div class="frame"><div class="loader">読み込み中…</div></div>
-    </section>
-    <section class="panel" id="sub-panel-ppt" data-title="PowerPoint" data-src="office/index.html?type=pptx" hidden>
-      
-      <div class="frame"><div class="loader">読み込み中…</div></div>
-    </section>
-    <section class="panel" id="sub-panel-pdf" data-title="PDF" data-src="office/index.html?type=pdf" hidden>
-      <div class="frame"><div class="loader">読み込み中…</div></div>
-    </section>
-    <section class="panel" id="sub-panel-form" data-title="フォーム" data-src="office/index.html?type=pdf&mode=form" hidden>
       <div class="frame"><div class="loader">読み込み中…</div></div>
     </section>
     </div>
@@ -201,57 +187,39 @@ body{
 (function(){
   const IDS = ["squish","photo","office","video","draw2d","draw3d"];
   const SUBS = ["word","excel","viewer","ppt","pdf","form"];
-  const OFFICE_URLS = (window.APP_CONFIG && window.APP_CONFIG.OFFICE_URLS) || {};
-  const DL = "https://github.com/ONLYOFFICE/DesktopEditors";
+  const OO_URL = safeUrl((window.APP_CONFIG && window.APP_CONFIG.OFFICE_URL) || "") || "https://oonxt.github.io/wasm-onlyoffice-demo/";
+  const HINTS = {
+    word:"「New: DOCX」をクリックして文書を作成、または「Open File…」で .docx を開く",
+    excel:"「New: XLSX」をクリックして表を作成、または「Open File…」で .xlsx を開く",
+    ppt:"「New: PPTX」をクリックしてスライドを作成、または「Open File…」で .pptx を開く",
+    pdf:"「Open File…」で PDF を選択して表示・編集",
+    form:"「Open File…」でフォーム付き PDF を選択して入力"
+  };
   let curSub = "word";
 
   function safeUrl(raw){
     try{ const u = new URL(raw, location.href); if(u.protocol==="http:"||u.protocol==="https:") return u.href; }catch(e){}
     return "";
   }
-  function placeholder(frame, name, key){
-    const d = document.createElement("div"); d.className = "ph";
-    d.innerHTML = "<b>"+name+"</b><span>ONLYOFFICE エディターの URL が未設定です。<br><code>config.js</code> の <code>OFFICE_URLS."+key+"</code> に設定するとここに表示されます。<br>デスクトップ版: <a href=\""+DL+"\" target=\"_blank\" rel=\"noopener noreferrer\">ONLYOFFICE DesktopEditors ↗</a></span>";
-    frame.append(d);
-    frame.querySelector(".loader").remove();
-  }
-  function ensureSub(id){
-    const p = document.getElementById("sub-panel-"+id);
-    if(p.dataset.ready) return; p.dataset.ready = "1";
-    const frame = p.querySelector(".frame");
-    if(p.dataset.local){
-      const f = document.createElement("iframe"); f.title = p.dataset.title; frame.append(f);
-      const d = document.createElement("div"); d.className = "ph";
-      d.innerHTML = "<b>"+p.dataset.title+"</b><span>「ファイルを開く」で PDF を選択してください。"+(id==="form"?"<br>入力可能なフォーム（AcroForm）はそのまま入力できます。":"")+"</span>";
-      frame.append(d); frame.querySelector(".loader").remove();
-      let url;
-      p.querySelector("input").addEventListener("change", e => {
-        const file = e.target.files[0]; if(!file) return;
-        if(url) URL.revokeObjectURL(url);
-        url = URL.createObjectURL(file); f.src = url; d.remove();
-      });
-      return;
-    }
-    let src = p.dataset.src || (p.dataset.cfg ? safeUrl(OFFICE_URLS[p.dataset.cfg]||"") : "");
-    const x2t = window.APP_CONFIG && window.APP_CONFIG.OFFICE_X2T_URL;
-    if(src.startsWith("office/") && x2t) src += "&x2t=" + encodeURIComponent(x2t);
-    if(!src){ placeholder(frame, p.dataset.title, p.dataset.cfg); return; }
-    const f = document.createElement("iframe"); f.title = p.dataset.title;
+  function mount(panelId, src){
+    const p = document.getElementById(panelId);
+    if(p.querySelector("iframe")) return;
+    const f = document.createElement("iframe"); f.title = p.dataset.title || panelId;
     f.allow = "fullscreen; clipboard-read; clipboard-write"; f.allowFullscreen = true;
     f.addEventListener("load", () => p.classList.add("loaded"));
-    f.src = src; frame.append(f);
+    f.src = src; p.querySelector(".frame").append(f);
   }
+  document.getElementById("ooOpen").href = OO_URL;
   function activateSub(id){
     if(!SUBS.includes(id)) id = curSub;
     curSub = id;
-    SUBS.forEach(k => {
-      const on = k === id;
-      document.getElementById("sub-"+k).setAttribute("aria-selected", on ? "true" : "false");
-      document.getElementById("sub-panel-"+k).hidden = !on;
-    });
-    ensureSub(id);
+    const shown = id === "viewer" ? "viewer" : "oo";
+    SUBS.forEach(k => document.getElementById("sub-"+k).setAttribute("aria-selected", k === id ? "true" : "false"));
+    ["viewer","oo"].forEach(k => document.getElementById("sub-panel-"+k).hidden = k !== shown);
+    if(shown === "viewer") mount("sub-panel-viewer", "excel/index.html");
+    else { document.getElementById("ooHint").textContent = HINTS[id]; mount("sub-panel-oo", OO_URL); }
   }
-  document.querySelectorAll("[data-sub]").forEach(b => b.addEventListener("click", () => { location.hash = "office/" + b.dataset.sub; }));
+    document.querySelectorAll("[data-sub]").forEach(b => b.addEventListener("click", () => { location.hash = "office/" + b.dataset.sub; }));
   const DEFAULT_VIDEO_URL = "https://opencut.app";
 
   // 動画エディターの URL（config.js）。http(s) 以外は無視して既定値にする
