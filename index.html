@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Squish — Earnest Architects</title>
+<title>Squish — Kikaku Platform</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#070b14">
 <link rel="icon" href="icon-192.png">
@@ -76,6 +76,8 @@ body{
 .bar b{color:var(--text); font-weight:600}
 .bar .sp{flex:1}
 .bar .hint{opacity:.8}
+.fbtn{display:inline-flex; align-items:center; cursor:pointer; color:var(--text); background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:5px 11px; font-size:12.5px}
+.fbtn:hover{border-color:var(--accent-glow)}
 .bar button,.bar a{
   display:inline-flex; align-items:center; gap:6px; color:var(--text); text-decoration:none; font:inherit; font-size:12.5px;
   background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:5px 11px; cursor:pointer;
@@ -83,12 +85,25 @@ body{
 .bar button:hover,.bar a:hover{border-color:var(--accent-glow)}
 .bar button:focus-visible,.bar a:focus-visible{outline:2px solid var(--accent-glow); outline-offset:2px}
 @media (max-width:700px){.bar .hint{display:none}}
+
+/* ---------- Office サブタブ ---------- */
+.subtabs{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding:6px 18px; background:var(--panel); border-bottom:1px solid var(--border)}
+.subtabs::-webkit-scrollbar{display:none}
+.subtabs button{font:inherit; font-size:13px; color:var(--muted); background:transparent; border:1px solid transparent; border-radius:8px; padding:5px 12px; cursor:pointer; white-space:nowrap}
+.subtabs button:hover{color:var(--text); background:var(--panel2)}
+.subtabs button[aria-selected="true"]{color:var(--text); background:var(--accent2); border-color:var(--accent)}
+.subtabs button:focus-visible{outline:2px solid var(--accent-glow); outline-offset:2px}
+#subviews{flex:1; min-height:0; display:flex; flex-direction:column}
+.ph{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center; color:var(--muted); font-size:13.5px; line-height:1.7}
+.ph b{color:var(--text); font-size:16px}
+.ph a{color:var(--accent-glow)}
+.ph code{background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:1px 6px; color:var(--text)}
 </style>
 </head>
 <body>
 
 <header class="top">
-  <a class="brand" href="#squish" aria-label="Earnest Architects"><img src="logo.png" alt="Earnest Architects"></a>
+  <a class="brand" href="#squish" aria-label="Kikaku Platform"><img src="logo.png" alt="Kikaku Platform"></a>
   <nav class="tabs" role="tablist" aria-label="ツール">
     <button role="tab" id="tab-squish" aria-controls="panel-squish" aria-selected="true" data-tab="squish">
       <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -98,9 +113,9 @@ body{
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
       <span>フォトエディター</span>
     </button>
-    <button role="tab" id="tab-excel" aria-controls="panel-excel" aria-selected="false" tabindex="-1" data-tab="excel">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
-      <span>Excelビューア</span>
+    <button role="tab" id="tab-office" aria-controls="panel-office" aria-selected="false" tabindex="-1" data-tab="office">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5M9 13h8M9 17h8M9 9h3"/></svg>
+      <span>Office</span>
     </button>
     <button role="tab" id="tab-video" aria-controls="panel-video" aria-selected="false" tabindex="-1" data-tab="video">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2.2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
@@ -126,8 +141,39 @@ body{
     <div class="frame"><div class="loader">読み込み中…</div></div>
   </section>
 
-  <section class="panel" id="panel-excel" role="tabpanel" aria-labelledby="tab-excel" data-src="excel/index.html" data-title="Excelビューア" hidden>
-    <div class="frame"><div class="loader">読み込み中…</div></div>
+  <section class="panel" id="panel-office" role="tabpanel" aria-labelledby="tab-office" hidden>
+    <div class="subtabs" role="tablist" aria-label="Office">
+      <button role="tab" id="sub-word" aria-selected="true" data-sub="word">Word</button>
+      <button role="tab" id="sub-excel" aria-selected="false" data-sub="excel">Excel</button>
+      <button role="tab" id="sub-viewer" aria-selected="false" data-sub="viewer">Excelビューア</button>
+      <button role="tab" id="sub-ppt" aria-selected="false" data-sub="ppt">PowerPoint</button>
+      <button role="tab" id="sub-pdf" aria-selected="false" data-sub="pdf">PDF</button>
+      <button role="tab" id="sub-form" aria-selected="false" data-sub="form">フォーム</button>
+    </div>
+    <div id="subviews">
+    <section class="panel" id="sub-panel-word" data-title="Word" data-src="office/index.html?type=docx" hidden>
+      
+      <div class="frame"><div class="loader">読み込み中…</div></div>
+    </section>
+    <section class="panel" id="sub-panel-excel" data-title="Excel" data-src="office/index.html?type=xlsx" hidden>
+      
+      <div class="frame"><div class="loader">読み込み中…</div></div>
+    </section>
+    <section class="panel" id="sub-panel-viewer" data-title="Excelビューア" data-src="excel/index.html" hidden>
+      
+      <div class="frame"><div class="loader">読み込み中…</div></div>
+    </section>
+    <section class="panel" id="sub-panel-ppt" data-title="PowerPoint" data-src="office/index.html?type=pptx" hidden>
+      
+      <div class="frame"><div class="loader">読み込み中…</div></div>
+    </section>
+    <section class="panel" id="sub-panel-pdf" data-title="PDF" data-src="office/index.html?type=pdf" hidden>
+      <div class="frame"><div class="loader">読み込み中…</div></div>
+    </section>
+    <section class="panel" id="sub-panel-form" data-title="フォーム" data-src="office/index.html?type=pdf&mode=form" hidden>
+      <div class="frame"><div class="loader">読み込み中…</div></div>
+    </section>
+    </div>
   </section>
 
   <section class="panel" id="panel-video" role="tabpanel" aria-labelledby="tab-video" data-title="動画エディター（OpenCut）" hidden>
@@ -153,7 +199,59 @@ body{
 <script src="config.js"></script>
 <script>
 (function(){
-  const IDS = ["squish","photo","excel","video","draw2d","draw3d"];
+  const IDS = ["squish","photo","office","video","draw2d","draw3d"];
+  const SUBS = ["word","excel","viewer","ppt","pdf","form"];
+  const OFFICE_URLS = (window.APP_CONFIG && window.APP_CONFIG.OFFICE_URLS) || {};
+  const DL = "https://github.com/ONLYOFFICE/DesktopEditors";
+  let curSub = "word";
+
+  function safeUrl(raw){
+    try{ const u = new URL(raw, location.href); if(u.protocol==="http:"||u.protocol==="https:") return u.href; }catch(e){}
+    return "";
+  }
+  function placeholder(frame, name, key){
+    const d = document.createElement("div"); d.className = "ph";
+    d.innerHTML = "<b>"+name+"</b><span>ONLYOFFICE エディターの URL が未設定です。<br><code>config.js</code> の <code>OFFICE_URLS."+key+"</code> に設定するとここに表示されます。<br>デスクトップ版: <a href=\""+DL+"\" target=\"_blank\" rel=\"noopener noreferrer\">ONLYOFFICE DesktopEditors ↗</a></span>";
+    frame.append(d);
+    frame.querySelector(".loader").remove();
+  }
+  function ensureSub(id){
+    const p = document.getElementById("sub-panel-"+id);
+    if(p.dataset.ready) return; p.dataset.ready = "1";
+    const frame = p.querySelector(".frame");
+    if(p.dataset.local){
+      const f = document.createElement("iframe"); f.title = p.dataset.title; frame.append(f);
+      const d = document.createElement("div"); d.className = "ph";
+      d.innerHTML = "<b>"+p.dataset.title+"</b><span>「ファイルを開く」で PDF を選択してください。"+(id==="form"?"<br>入力可能なフォーム（AcroForm）はそのまま入力できます。":"")+"</span>";
+      frame.append(d); frame.querySelector(".loader").remove();
+      let url;
+      p.querySelector("input").addEventListener("change", e => {
+        const file = e.target.files[0]; if(!file) return;
+        if(url) URL.revokeObjectURL(url);
+        url = URL.createObjectURL(file); f.src = url; d.remove();
+      });
+      return;
+    }
+    let src = p.dataset.src || (p.dataset.cfg ? safeUrl(OFFICE_URLS[p.dataset.cfg]||"") : "");
+    const x2t = window.APP_CONFIG && window.APP_CONFIG.OFFICE_X2T_URL;
+    if(src.startsWith("office/") && x2t) src += "&x2t=" + encodeURIComponent(x2t);
+    if(!src){ placeholder(frame, p.dataset.title, p.dataset.cfg); return; }
+    const f = document.createElement("iframe"); f.title = p.dataset.title;
+    f.allow = "fullscreen; clipboard-read; clipboard-write"; f.allowFullscreen = true;
+    f.addEventListener("load", () => p.classList.add("loaded"));
+    f.src = src; frame.append(f);
+  }
+  function activateSub(id){
+    if(!SUBS.includes(id)) id = curSub;
+    curSub = id;
+    SUBS.forEach(k => {
+      const on = k === id;
+      document.getElementById("sub-"+k).setAttribute("aria-selected", on ? "true" : "false");
+      document.getElementById("sub-panel-"+k).hidden = !on;
+    });
+    ensureSub(id);
+  }
+  document.querySelectorAll("[data-sub]").forEach(b => b.addEventListener("click", () => { location.hash = "office/" + b.dataset.sub; }));
   const DEFAULT_VIDEO_URL = "https://opencut.app";
 
   // 動画エディターの URL（config.js）。http(s) 以外は無視して既定値にする
@@ -181,7 +279,9 @@ body{
     panel.querySelector(".frame").append(f);
   }
 
-  function activate(id){
+  function activate(hash){
+    let [id, sub] = hash.split("/");
+    if(id === "excel"){ id = "office"; sub = "viewer"; }
     if(!IDS.includes(id)) id = "squish";
     IDS.forEach(k => {
       const on = k === id;
@@ -191,15 +291,15 @@ body{
       document.getElementById("panel-" + k).hidden = !on;
     });
     document.getElementById("tab-" + id).scrollIntoView({block:"nearest", inline:"nearest"});
-    ensureFrame(id);
+    if(id === "office") activateSub(sub); else ensureFrame(id);
   }
 
-  document.querySelectorAll('[role="tab"]').forEach(t => {
+  document.querySelectorAll(".tabs [role=tab]").forEach(t => {
     t.addEventListener("click", () => { location.hash = t.dataset.tab; });
   });
 
   // ← → Home End でタブを移動
-  document.querySelector('[role="tablist"]').addEventListener("keydown", e => {
+  document.querySelector(".tabs").addEventListener("keydown", e => {
     const cur = IDS.findIndex(k => document.getElementById("tab-" + k).getAttribute("aria-selected") === "true");
     let next = -1;
     if(e.key === "ArrowRight") next = (cur + 1) % IDS.length;
@@ -219,7 +319,7 @@ body{
     f.src = VIDEO_URL;
   });
 
-  // #squish / #photo / #excel / #video で直接開ける（ブラウザの戻る・進むにも対応）
+  // #squish / #photo / #office/word など / #video で直接開ける（ブラウザの戻る・進むにも対応）
   window.addEventListener("hashchange", () => activate(location.hash.slice(1)));
   activate(location.hash.slice(1));
 

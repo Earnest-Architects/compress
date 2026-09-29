@@ -1,4 +1,4 @@
-# Squish — Earnest Architects
+# Squish — Kikaku Platform
 
 Web utama berisi enam tab dalam satu situs statis (tanpa server/backend, tanpa build step):
 
@@ -6,14 +6,14 @@ Web utama berisi enam tab dalam satu situs statis (tanpa server/backend, tanpa b
 | --- | --- | --- |
 | 画像圧縮 | Squish — kompres JPEG/PNG/WebP langsung di browser | `squish.html` (proyek asli) |
 | フォトエディター | Photopea, ditanam dengan bahasa Jepang | `editor.html` |
-| Excelビューア | Lihat .xlsx/.xls/.csv di browser | `excel/` (dari `excel-main.zip`) |
+| Office | Sub-tab: Word, Excel, Excelビューア (`excel/`), PowerPoint, PDF, フォーム | `office/` (ONLYOFFICE web-apps + `wasm-onlyoffice-sdk`, AGPL-3.0) |
 | 動画エディター | OpenCut, ditanam lewat iframe | `config.js` mengatur URL-nya |
 | 2Dドロワー | openPlan3D — editor floor plan 2D/3D | `plan2d/` (di-build dari `laanlabs/openPlan3D`) |
 | 3Dドロワー | Hew — pemodel 3D solid-first | `hew/` (rilis resmi `hew3d/hew` v1.1.0) |
 
 `index.html` adalah halaman utama (shell tab). Setiap tab dimuat sekali saat pertama dibuka dan tetap
 mempertahankan statusnya saat pindah tab. Buka langsung ke tab tertentu dengan `#squish` `#photo`
-`#excel` `#video` `#draw2d` `#draw3d` di akhir URL.
+`#office/word` `#office/viewer` `#office/pdf` `#video` `#draw2d` `#draw3d` di akhir URL.
 
 ## Tentang tab 2Dドロワー (openPlan3D)
 
@@ -82,3 +82,9 @@ ada di README versi sebelumnya / repo `opencut-classic`.
 1. Buka situs di Edge/Chrome.
 2. Klik ikon "Instal" di address bar (atau menu ⋮ → "Apps" → "Install this site as an app").
 3. Setelah terinstal, klik kanan ikon di taskbar → "**Pin to taskbar**".
+
+## Tab Office (ONLYOFFICE)
+
+- Word/Excel/PowerPoint/PDF/フォーム memakai editor ONLYOFFICE yang berjalan di browser (konversi via WASM `x2t`, tanpa Document Server). Kode: `office/`, SDK: [oonxt/wasm-onlyoffice-sdk](https://github.com/oonxt/wasm-onlyoffice-sdk) (AGPL-3.0).
+- `x2t` (converter WASM, sudah didekompres) ada di `office/x2t/` jadi tidak perlu header khusus. Aset editor besar (sdkjs/font, ±670 MB) tetap dimuat dari CDN publik lewat `<base href>` di `office/v9.3.0.24-1/`, jadi butuh internet. Untuk mandiri penuh, salin aset dari branch `gh-pages` `oonxt/wasm-onlyoffice-demo` ke server sendiri dan ganti `<base href>`.
+- Harus dibuka lewat http(s) (bukan `file://`).
