@@ -298,15 +298,26 @@ function encode(format,quality){
   });
 }
 
+// 圧縮結果をデコードして比較用キャンバスに描画（劣化を実際に見せる）
+async function showBlob(blob){
+  const bmp=await createImageBitmap(blob);
+  ctx.clearRect(0,0,compCanvas.width,compCanvas.height);
+  ctx.drawImage(bmp,0,0,compCanvas.width,compCanvas.height);
+  if(bmp.close) bmp.close();
+}
+let renderToken=0;
 async function renderCompressed(){
   if(!imgEl) return;
+  const token=++renderToken;
   ctx.clearRect(0,0,compCanvas.width,compCanvas.height);
   ctx.drawImage(imgEl,0,0);
   const format=formatSelect.value;
   const quality=Number(qualitySlider.value)/100;
   qualityCtrl.style.opacity = format==="image/png" ? .4 : 1;
   const blob=await encode(format,quality);
-  if(!blob) return;
+  if(!blob || token!==renderToken) return;
+  await showBlob(blob);
+  if(token!==renderToken) return;
   compBytes=blob.size;
   compSizeEl.textContent=fmtSize(compBytes);
   if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
@@ -382,6 +393,8 @@ async function compressToTarget(){
     if(diff<bestDiff){ bestDiff=diff; bestQ=mid; bestBlob=blob; }
     if(blob.size>targetBytes) hi=mid; else lo=mid;
   }
+  renderToken++;
+  await showBlob(bestBlob);
   compBytes=bestBlob.size;
   compSizeEl.textContent=fmtSize(compBytes);
   if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
