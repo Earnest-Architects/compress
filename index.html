@@ -89,6 +89,12 @@ body{
 /* ---------- Office サブタブ ---------- */
 .subtabs{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding:6px 18px; background:var(--panel); border-bottom:1px solid var(--border)}
 .subtabs::-webkit-scrollbar{display:none}
+.subtabs .sp{flex:1}
+.subtabs{align-items:center}
+.subhint{font-size:12px; color:var(--muted); white-space:nowrap}
+.subopen{color:var(--muted); text-decoration:none; padding:4px 8px; border-radius:6px}
+.subopen:hover{color:var(--text); background:var(--panel2)}
+@media (max-width:900px){.subhint{display:none}}
 .subtabs button{font:inherit; font-size:13px; color:var(--muted); background:transparent; border:1px solid transparent; border-radius:8px; padding:5px 12px; cursor:pointer; white-space:nowrap}
 .subtabs button:hover{color:var(--text); background:var(--panel2)}
 .subtabs button[aria-selected="true"]{color:var(--text); background:var(--accent2); border-color:var(--accent)}
@@ -121,10 +127,6 @@ body{
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2.2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
       <span>動画エディター</span>
     </button>
-    <button role="tab" id="tab-draw2d" aria-controls="panel-draw2d" aria-selected="false" tabindex="-1" data-tab="draw2d">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v18H3z"/><path d="M3 12h7M14 12h7M12 3v6M12 15v6"/><path d="M10 12a2 2 0 0 1 2 2" /></svg>
-      <span>2Dドロワー</span>
-    </button>
     <button role="tab" id="tab-draw3d" aria-controls="panel-draw3d" aria-selected="false" tabindex="-1" data-tab="draw3d">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 12v10"/></svg>
       <span>3Dドロワー</span>
@@ -149,10 +151,10 @@ body{
       <button role="tab" id="sub-ppt" aria-selected="false" data-sub="ppt">PowerPoint</button>
       <button role="tab" id="sub-pdf" aria-selected="false" data-sub="pdf">PDF</button>
       <button role="tab" id="sub-form" aria-selected="false" data-sub="form">フォーム</button>
+      <span class="sp"></span><span id="ooHint" class="subhint"></span><a id="ooOpen" class="subopen" href="#" target="_blank" rel="noopener noreferrer">↗</a>
     </div>
     <div id="subviews">
     <section class="panel" id="sub-panel-oo" data-title="ONLYOFFICE" hidden>
-      <div class="bar"><span><b>ONLYOFFICE</b> · <span id="ooHint"></span></span><span class="sp"></span><a id="ooOpen" href="#" target="_blank" rel="noopener noreferrer">新しいタブで開く ↗</a></div>
       <div class="frame"><div class="loader">読み込み中…</div></div>
     </section>
     <section class="panel" id="sub-panel-viewer" data-title="Excelビューア" data-src="excel/index.html" hidden>
@@ -173,10 +175,6 @@ body{
     <div class="frame"><div class="loader">読み込み中…</div></div>
   </section>
 
-  <section class="panel" id="panel-draw2d" role="tabpanel" aria-labelledby="tab-draw2d" data-src="plan2d/index.html" data-title="2Dドロワー（openPlan3D）" hidden>
-    <div class="frame"><div class="loader">読み込み中…</div></div>
-  </section>
-
   <section class="panel" id="panel-draw3d" role="tabpanel" aria-labelledby="tab-draw3d" data-src="hew/index.html" data-title="3Dドロワー（Hew）" hidden>
     <div class="frame"><div class="loader">読み込み中…</div></div>
   </section>
@@ -185,7 +183,7 @@ body{
 <script src="config.js"></script>
 <script>
 (function(){
-  const IDS = ["squish","photo","office","video","draw2d","draw3d"];
+  const IDS = ["squish","photo","office","video","draw3d"];
   const SUBS = ["word","excel","viewer","ppt","pdf","form"];
   const OO_URL = safeUrl((window.APP_CONFIG && window.APP_CONFIG.OFFICE_URL) || "") || "https://oonxt.github.io/wasm-onlyoffice-demo/";
   const HINTS = {
@@ -198,6 +196,7 @@ body{
   let curSub = "word";
 
   function safeUrl(raw){
+    if(!raw) return "";
     try{ const u = new URL(raw, location.href); if(u.protocol==="http:"||u.protocol==="https:") return u.href; }catch(e){}
     return "";
   }
@@ -216,7 +215,7 @@ body{
     const shown = id === "viewer" ? "viewer" : "oo";
     SUBS.forEach(k => document.getElementById("sub-"+k).setAttribute("aria-selected", k === id ? "true" : "false"));
     ["viewer","oo"].forEach(k => document.getElementById("sub-panel-"+k).hidden = k !== shown);
-    if(shown === "viewer") mount("sub-panel-viewer", "excel/index.html");
+    if(shown === "viewer"){ document.getElementById("ooHint").textContent = ""; } if(shown === "viewer") mount("sub-panel-viewer", "excel/index.html");
     else { document.getElementById("ooHint").textContent = HINTS[id]; mount("sub-panel-oo", OO_URL); }
   }
     document.querySelectorAll("[data-sub]").forEach(b => b.addEventListener("click", () => { location.hash = "office/" + b.dataset.sub; }));

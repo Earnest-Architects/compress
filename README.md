@@ -1,6 +1,6 @@
 # Squish — Kikaku Platform
 
-Web utama berisi enam tab dalam satu situs statis (tanpa server/backend, tanpa build step):
+Web utama berisi lima tab dalam satu situs statis (tanpa server/backend, tanpa build step):
 
 | Tab | Isi | Sumber |
 | --- | --- | --- |
@@ -8,24 +8,11 @@ Web utama berisi enam tab dalam satu situs statis (tanpa server/backend, tanpa b
 | フォトエディター | Photopea, ditanam dengan bahasa Jepang | `editor.html` |
 | Office | Sub-tab: Word, Excel, Excelビューア (`excel/`), PowerPoint, PDF, フォーム | `office/` (ONLYOFFICE web-apps + `wasm-onlyoffice-sdk`, AGPL-3.0) |
 | 動画エディター | OpenCut, ditanam lewat iframe | `config.js` mengatur URL-nya |
-| 2Dドロワー | openPlan3D — editor floor plan 2D/3D | `plan2d/` (di-build dari `laanlabs/openPlan3D`) |
 | 3Dドロワー | Hew — pemodel 3D solid-first | `hew/` (rilis resmi `hew3d/hew` v1.1.0) |
 
 `index.html` adalah halaman utama (shell tab). Setiap tab dimuat sekali saat pertama dibuka dan tetap
 mempertahankan statusnya saat pindah tab. Buka langsung ke tab tertentu dengan `#squish` `#photo`
-`#office/word` `#office/viewer` `#office/pdf` `#video` `#draw2d` `#draw3d` di akhir URL.
-
-## Tentang tab 2Dドロワー (openPlan3D)
-
-- Diambil dari [laanlabs/openPlan3D](https://github.com/laanlabs/openPlan3D) (lisensi MIT), di-build
-  sendiri sebagai *static single-page app* (adapter statis + hash router) supaya bisa berjalan sebagai
-  file biasa di dalam folder `plan2d/`, tanpa server Node.js.
-- Endpoint server (upload handoff dari app iOS, "assistant share", MCP) dihapus dari build ini karena
-  butuh backend sendiri (Firebase). Fitur inti — gambar, edit, render 3D, export SVG/DXF/PDF/PNG/JSON,
-  import JSON/RoomPlan — berjalan penuh secara lokal di browser.
-- **Bahasa:** UI-nya sendiri hanya punya English dan Portuguese (belum ada Jepang). Kalau perlu bahasa
-  Jepang di tab ini, bisa menyusul sebagai pekerjaan tambahan (dictionary di
-  `src/lib/i18n/locales/`), tapi ukurannya besar (±1.400 baris teks) sehingga saya belum menerjemahkannya.
+`#office/word` `#office/viewer` `#office/pdf` `#video` `#draw3d` di akhir URL.
 
 ## Tentang tab 3Dドロワー (Hew)
 
@@ -50,7 +37,6 @@ index.html        … shell tab (halaman utama)
 squish.html       … 画像圧縮
 editor.html       … フォトエディター（Photopea）
 excel/            … Excelビューア
-plan2d/           … 2Dドロワー（openPlan3D, static build）
 hew/              … 3Dドロワー（Hew v1.1.0 release）
 config.js         … URL 動画エディター（OpenCut）
 logo.png, icon-*.png, manifest.json, sw.js
@@ -75,7 +61,6 @@ ada di README versi sebelumnya / repo `opencut-classic`.
 | Squish, Excelビューア | milik Anda sendiri |
 | Photopea | ditanam sebagai layanan pihak ketiga (bukan open source, gratis untuk dipakai) |
 | OpenCut | AGPL-3.0 (ditanam sebagai iframe ke opencut.app, kode tidak disalin) |
-| openPlan3D | MIT |
 | Hew | AGPL-3.0 + Hew Plugin API Exception |
 
 ## Instal sebagai aplikasi (PWA) di Windows
