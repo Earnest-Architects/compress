@@ -1,61 +1,84 @@
-# Kikaku Platform
+# Squish — Earnest Architects
 
-画像圧縮を「メイン」に、複数のツールをタブで切り替えて使えるWebアプリです。ビルド手順は不要で、静的サイト（GitHub Pages、Netlify、Vercel など）としてそのままデプロイできます。
+Web utama berisi enam tab dalam satu situs statis (tanpa server/backend, tanpa build step):
 
-## タブ
+| Tab | Isi | Sumber |
+| --- | --- | --- |
+| 画像圧縮 | Squish — kompres JPEG/PNG/WebP langsung di browser | `squish.html` (proyek asli) |
+| フォトエディター | Photopea, ditanam dengan bahasa Jepang | `editor.html` |
+| Excelビューア | Lihat .xlsx/.xls/.csv di browser | `excel/` (dari `excel-main.zip`) |
+| 動画エディター | OpenCut, ditanam lewat iframe | `config.js` mengatur URL-nya |
+| 2Dドロワー | openPlan3D — editor floor plan 2D/3D | `plan2d/` (di-build dari `laanlabs/openPlan3D`) |
+| 3Dドロワー | Hew — pemodel 3D solid-first | `hew/` (rilis resmi `hew3d/hew` v1.1.0) |
 
-|タブ|内容|ファイル|
-|-|-|-|
-|画像圧縮|Squish。ブラウザ内で JPEG / PNG / WebP を圧縮（アップロードなし）|`squish.html`|
-|フォトエディター|Photopea を日本語表示で埋め込み|`editor.html`|
-|Excelビューア|.xlsx / .xls / .csv などをブラウザで表示・印刷（外部送信なし）|`excel/index.html`|
-|動画エディター|OpenCut（無料のオープンソース動画エディター）を埋め込み|`config.js` で URL を指定|
+`index.html` adalah halaman utama (shell tab). Setiap tab dimuat sekali saat pertama dibuka dan tetap
+mempertahankan statusnya saat pindah tab. Buka langsung ke tab tertentu dengan `#squish` `#photo`
+`#excel` `#video` `#draw2d` `#draw3d` di akhir URL.
 
-* `index.html` がタブの土台（メインページ）です。
-* 各タブは最初に開いたときに読み込まれ、切り替えても状態（開いた画像・Excel など）は保持されます。
-* `#squish` `#photo` `#excel` `#video` を URL の末尾に付けると、そのタブで直接開けます（例：`index.html#excel`）。
-* 各ページは単体でも開けます（`squish.html`、`excel/index.html` など）。
+## Tentang tab 2Dドロワー (openPlan3D)
 
-## フォルダ構成
+- Diambil dari [laanlabs/openPlan3D](https://github.com/laanlabs/openPlan3D) (lisensi MIT), di-build
+  sendiri sebagai *static single-page app* (adapter statis + hash router) supaya bisa berjalan sebagai
+  file biasa di dalam folder `plan2d/`, tanpa server Node.js.
+- Endpoint server (upload handoff dari app iOS, "assistant share", MCP) dihapus dari build ini karena
+  butuh backend sendiri (Firebase). Fitur inti — gambar, edit, render 3D, export SVG/DXF/PDF/PNG/JSON,
+  import JSON/RoomPlan — berjalan penuh secara lokal di browser.
+- **Bahasa:** UI-nya sendiri hanya punya English dan Portuguese (belum ada Jepang). Kalau perlu bahasa
+  Jepang di tab ini, bisa menyusul sebagai pekerjaan tambahan (dictionary di
+  `src/lib/i18n/locales/`), tapi ukurannya besar (±1.400 baris teks) sehingga saya belum menerjemahkannya.
+
+## Tentang tab 3Dドロワー (Hew)
+
+- Diambil dari rilis resmi **v1.1.0** [hew3d/hew](https://github.com/hew3d/hew) (tarball
+  `hew-web-v1.1.0.tar.gz` yang sama dengan yang dipakai app.hew3d.com), bukan hasil build dari source —
+  Hew memakai kernel geometri Rust/WASM yang butuh toolchain `wasm-pack` untuk dikompilasi, jadi memakai
+  rilis resminya lebih aman ketimbang membangunnya ulang di sini.
+- Path absolut (`/assets/...`) dalam build diubah menjadi relatif agar bisa disajikan dari folder
+  `hew/`, bukan hanya dari root domain.
+- **Lisensi: AGPL-3.0.** Ini beda dari tab lain — AGPL mewajibkan kode sumber (termasuk modifikasi)
+  tersedia untuk siapa pun yang memakai aplikasinya lewat jaringan. Karena di sini dipakai tanpa
+  modifikasi kode, cukup pastikan tautan ke [repo aslinya](https://github.com/hew3d/hew) tetap ada
+  (sudah dicantumkan di sini) bila situs ini dipublikasikan.
+- **Bahasa:** UI Hew saat ini hanya berbahasa Inggris; proyeknya belum punya sistem i18n.
+- Fitur "Open on Phone" (relay) tidak ikut disertakan — itu perlu service `hew-relay` terpisah di server
+  Anda sendiri (lihat `docs/SELF_HOSTING.md` di repo Hew jika suatu saat ingin mengaktifkannya).
+
+## Struktur folder
 
 ```
-index.html        … タブの土台（メイン）
+index.html        … shell tab (halaman utama)
 squish.html       … 画像圧縮
 editor.html       … フォトエディター（Photopea）
-excel/            … Excelビューア（独自の sw.js / manifest を含む）
-config.js         … 動画エディターの URL 設定
-logo.png, icon-\*.png, manifest.json, sw.js
+excel/            … Excelビューア
+plan2d/           … 2Dドロワー（openPlan3D, static build）
+hew/              … 3Dドロワー（Hew v1.1.0 release）
+config.js         … URL 動画エディター（OpenCut）
+logo.png, icon-*.png, manifest.json, sw.js
 ```
 
-## 動画エディター（OpenCut）の設定
+## Video editor (OpenCut)
 
-`config.js` の `VIDEO\_EDITOR\_URL` を書き換えます。
-
+Ubah `config.js`:
 ```js
-window.APP\_CONFIG = {
-  VIDEO\_EDITOR\_URL: "https://opencut.app"   // 既定：公開版（classic）
-};
+window.APP_CONFIG = { VIDEO_EDITOR_URL: "https://opencut.app" };
 ```
+Repo yang diminta (`opencut-app/opencut`) sedang ditulis ulang dari nol dan tidak menghasilkan file
+statis; README-nya sendiri mengarahkan ke versi stabil `opencut-classic` yang menjalankan opencut.app.
+Karena itu tab ini menanam opencut.app lewat iframe, bukan menyalin kodenya. Jika opencut.app menolak
+ditampilkan sebagai iframe, gunakan tombol "新しいタブで開く" di atas tab tersebut. Detail hosting sendiri
+ada di README versi sebelumnya / repo `opencut-classic`.
 
-* `https://opencut.app` … 公開されている安定版（classic）。既定値です。
-* `https://new.opencut.app` … 書き直し中の新バージョン（開発中）。
-* 自分でホスティングする場合は、[opencut-app/opencut-classic](https://github.com/opencut-app/opencut-classic) を取得して、その URL を指定します。
-Next.js アプリで、データベース（PostgreSQL）と Redis が必要です。手順の概要：
+## Catatan lisensi ringkas
 
-  1. `cp apps/web/.env.example apps/web/.env.local`
-  2. `docker compose up -d db redis serverless-redis-http`
-  3. `bun install` → `bun dev:web`（`http://localhost:3000`）
-  4. `VIDEO\_EDITOR\_URL: "http://localhost:3000"` に変更
+| Bagian | Lisensi |
+| --- | --- |
+| Squish, Excelビューア | milik Anda sendiri |
+| Photopea | ditanam sebagai layanan pihak ketiga (bukan open source, gratis untuk dipakai) |
+| OpenCut | AGPL-3.0 (ditanam sebagai iframe ke opencut.app, kode tidak disalin) |
+| openPlan3D | MIT |
+| Hew | AGPL-3.0 + Hew Plugin API Exception |
 
-### 注意
-
-* 外部サイトを iframe で表示するため、**相手側の設定によっては埋め込みが拒否される**ことがあります。その場合は、動画エディタータブ上部の「新しいタブで開く ↗」を使ってください。
-* 埋め込み表示では、ブラウザの仕様により、保存されるプロジェクトのデータが opencut.app を直接開いた場合とは別扱いになることがあります。
-* OpenCut は MIT ライセンスです。
-
-## アプリ（PWA）として Windows にインストール
-
-1. Edge/Chrome でサイトを開きます。
-2. アドレスバーの「インストール」アイコンをクリックします（またはメニュー ⋮ →「アプリ」→「このサイトをアプリとしてインストール」）。
-3. インストール後、アプリを開き、タスクバーのアイコンを右クリック →「**タスクバーにピン留めする**」。
-
+## Instal sebagai aplikasi (PWA) di Windows
+1. Buka situs di Edge/Chrome.
+2. Klik ikon "Instal" di address bar (atau menu ⋮ → "Apps" → "Install this site as an app").
+3. Setelah terinstal, klik kanan ikon di taskbar → "**Pin to taskbar**".

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Kikaku Platform</title>
+<title>Squish — Earnest Architects</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#070b14">
 <link rel="icon" href="icon-192.png">
@@ -88,7 +88,7 @@ body{
 <body>
 
 <header class="top">
-  <a class="brand" href="#squish" aria-label="Kikaku Platform"><img src="logo.png" alt="Kikaku Platform"></a>
+  <a class="brand" href="#squish" aria-label="Earnest Architects"><img src="logo.png" alt="Earnest Architects"></a>
   <nav class="tabs" role="tablist" aria-label="ツール">
     <button role="tab" id="tab-squish" aria-controls="panel-squish" aria-selected="true" data-tab="squish">
       <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -105,6 +105,14 @@ body{
     <button role="tab" id="tab-video" aria-controls="panel-video" aria-selected="false" tabindex="-1" data-tab="video">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2.2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
       <span>動画エディター</span>
+    </button>
+    <button role="tab" id="tab-draw2d" aria-controls="panel-draw2d" aria-selected="false" tabindex="-1" data-tab="draw2d">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v18H3z"/><path d="M3 12h7M14 12h7M12 3v6M12 15v6"/><path d="M10 12a2 2 0 0 1 2 2" /></svg>
+      <span>2Dドロワー</span>
+    </button>
+    <button role="tab" id="tab-draw3d" aria-controls="panel-draw3d" aria-selected="false" tabindex="-1" data-tab="draw3d">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 12v10"/></svg>
+      <span>3Dドロワー</span>
     </button>
   </nav>
 </header>
@@ -132,12 +140,20 @@ body{
     </div>
     <div class="frame"><div class="loader">読み込み中…</div></div>
   </section>
+
+  <section class="panel" id="panel-draw2d" role="tabpanel" aria-labelledby="tab-draw2d" data-src="plan2d/index.html" data-title="2Dドロワー（openPlan3D）" hidden>
+    <div class="frame"><div class="loader">読み込み中…</div></div>
+  </section>
+
+  <section class="panel" id="panel-draw3d" role="tabpanel" aria-labelledby="tab-draw3d" data-src="hew/index.html" data-title="3Dドロワー（Hew）" hidden>
+    <div class="frame"><div class="loader">読み込み中…</div></div>
+  </section>
 </main>
 
 <script src="config.js"></script>
 <script>
 (function(){
-  const IDS = ["squish","photo","excel","video"];
+  const IDS = ["squish","photo","excel","video","draw2d","draw3d"];
   const DEFAULT_VIDEO_URL = "https://opencut.app";
 
   // 動画エディターの URL（config.js）。http(s) 以外は無視して既定値にする
