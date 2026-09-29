@@ -1,4 +1,4 @@
-# Squish — Kikaku Platform
+# Kikaku Platform
 
 Web utama berisi lima tab dalam satu situs statis (tanpa server/backend, tanpa build step):
 

@@ -1,6 +1,6 @@
 {
-  "name": "Squish — Kikaku Platform",
-  "short_name": "Squish",
+  "name": "Kikaku Platform",
+  "short_name": "Kikaku",
   "description": "画像圧縮・フォトエディター・Office（Word・Excel・PowerPoint・PDF・フォーム）・動画エディターをひとつにまとめたツール — Kikaku Platform",
   "start_url": ".",
   "scope": ".",

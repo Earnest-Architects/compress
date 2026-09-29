@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Squish — Kikaku Platform｜画像圧縮ツール</title>
+<title>Kikaku Platform｜画像圧縮ツール</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#070b14">
 <link rel="icon" href="icon-192.png">
@@ -69,7 +69,7 @@ main{flex:1; display:flex; flex-direction:column; align-items:center; padding:26
 .stage img, .stage canvas{display:block; max-height:80vh; max-width:100%; pointer-events:none}
 .canvasWrap:fullscreen .stage img, .canvasWrap:fullscreen .stage canvas{max-height:100vh}
 .clipLayer{position:absolute; top:0; left:0; height:100%; overflow:hidden}
-.clipLayer canvas{height:100%; width:auto; max-height:none; max-width:none}
+.clipLayer img{height:100%; width:auto; max-height:none; max-width:none}
 .handle{
   position:absolute; top:0; bottom:0; width:0; cursor:ew-resize; z-index:5;
 }
@@ -162,8 +162,8 @@ footer{text-align:center; color:var(--muted); font-size:11.5px; padding:16px; op
       </div>
       <div class="canvasWrap" id="canvasWrap">
         <div class="stage" id="stage">
-          <img id="origImg" draggable="false">
-          <div class="clipLayer" id="clipLayer"><canvas id="compCanvas"></canvas></div>
+          <canvas id="compCanvas"></canvas>
+          <div class="clipLayer" id="clipLayer"><img id="origImg" draggable="false"></div>
           <div class="handle" id="handle"><div class="line"></div><div class="knob">⇔</div></div>
         </div>
       </div>
